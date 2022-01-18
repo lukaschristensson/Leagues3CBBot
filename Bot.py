@@ -109,9 +109,9 @@ async def standings(sc):
     description='Prints out a link to the source code',
     guild_ids=clan_ids.values()
 )
-async def source_code(sc):
+async def source_code(sc:SlashContext):
     print('source_code was called')
-    await sc.send('https://github.com/lukaschristensson/Leagues3CBBot')
+    await sc.send('https://github.com/lukaschristensson/Leagues3CBBot', hidden=True)
 
 @client.event
 async def on_ready():
