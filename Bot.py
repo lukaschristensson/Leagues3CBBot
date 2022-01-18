@@ -12,20 +12,23 @@ IR_MEMBERS_URL = './Res/ir_members.txt'
 client = commands.Bot(command_prefix='?')   # honestly no idea why i'm required to supply a command_prefix but whatever
 slash = SlashCommand(client, sync_commands=True)
 
-clan_ids = {
-    872875986910314518:'IR',
-    922450621720829982:'OS'
-}
+clan_ids = {}
+clan_authority_roles = {}
 
-clan_authority_roles = {
-    872875986910314518: ['leaders', 'event team', 'admin'],
-    922450621720829982: ['founders', 'developers']
-}
+def load_all_resources():
+    load_resources()
+    ids = open('./server_ids', 'r').readline()
+   # clan_ids['MOM'], clan_ids['IR'], clan_ids['OS'] = list(map(int,ids.split(', ')))
+    clan_ids['IR'], clan_ids['MOM'], clan_ids['OS'] = list(map(int,ids.split(', ')))    # swapping mom and ir server id to test things
+
+    clan_authority_roles[clan_ids['MOM']]= ['admin']
+    clan_authority_roles[clan_ids['IR']] = ['leaders', 'event team', 'admin']
+    clan_authority_roles[clan_ids['OS']] = ['founders', 'developers']
 
 @slash.slash(
     name='update_clan',
     description='Updates the entire clan.',
-    guild_ids=[872875986910314518]
+    guild_ids=clan_ids.values()
 )
 async def update_clan(sc):
     await sc.defer()
@@ -33,12 +36,12 @@ async def update_clan(sc):
     for auth_role in clan_authority_roles[sc.guild.id]: auth += auth_role.lower() in list(map(lambda x:x.name.lower(), sc.author.roles))
     if auth < 1: await sc.send('You\'re not authorized to use this command, please use the slash command \'update <your rsn here>\' instead')
     else:
-        if clan_ids[sc.guild.id] == 'IR':
+        if clan_ids['IR'] == sc.guild.id:
             ir_members = list(map(lambda x:x.replace('\n', '').replace(',',''), open(IR_MEMBERS_URL, 'r').readlines()))
             os_members = list(map(lambda x:x.replace('\n', '').replace(',',''), open(OS_MEMBERS_URL, 'r').readlines()))
 
             tot_updated = 0
-            if clan_ids[sc.guild.id] == 'IR':
+            if clan_ids['IR'] == sc.guild.id:
                 tot_updated += len(update_players_data(ir_members))
             else:
                 tot_updated += len(update_players_data(os_members))
@@ -48,7 +51,7 @@ async def update_clan(sc):
 
             png_lock = draw_all_categories(ir_data, os_data)
 
-            await sc.send(str(tot_updated) + ' members from ' + ('Iron Republic ' if clan_ids[sc.guild.id] == 'IR' else 'One Shot ') + ' have been updated. These are the current standings.', files=[discord.File('./Res/snapshot.png')])
+            await sc.send(str(tot_updated) + ' members from ' + ('Iron Republic ' if clan_ids['IR'] == sc.guild.id else 'One Shot ') + ' have been updated. These are the current standings.', files=[discord.File('./Res/snapshot.png')])
             png_lock.release()
 
 @slash.slash(
@@ -62,7 +65,7 @@ async def update_clan(sc):
             required=True
         )
     ],
-    guild_ids=[872875986910314518]
+    guild_ids=clan_ids.values()
 )
 async def update(sc, rsn):
     await sc.defer()
@@ -70,10 +73,10 @@ async def update(sc, rsn):
     os_members = list(map(lambda x:x.replace('\n', '').replace(',',''), open(OS_MEMBERS_URL, 'r').readlines()))
     print(ir_members)
     print(os_members)
-    if rsn not in (ir_members if clan_ids[sc.guild.id] == 'IR' else os_members):
+    if rsn not in (ir_members if clan_ids['IR'] == sc.guild.id else os_members):
         await sc.send('Player '+rsn+' is not part of your clan, did you spell it correctly?')
     elif len(update_player_data(rsn)) == 1:
-        await sc.send('Player '+rsn+' has been updated, use the slash command \'standings\' to check how you\'re fairing against '+('Iron Republic' if clan_ids[sc.guild.id] == 'OS' else'One Shot')+'!')
+        await sc.send('Player '+rsn+' has been updated, use the slash command \'standings\' to check how you\'re fairing against '+('Iron Republic' if clan_ids['OS'] == sc.guild.id else'One Shot')+'!')
     else:
         await sc.send('Something went wrong, try again in a few minutes.')
 
@@ -81,7 +84,7 @@ async def update(sc, rsn):
 @slash.slash(
     name='standings',
     description='Generates an updated graph to keep track of the who\'s winning!',
-    guild_ids=[872875986910314518]
+    guild_ids=clan_ids.values()
 )
 async def standings(sc):
     await sc.defer()
@@ -93,13 +96,18 @@ async def standings(sc):
     await sc.send(' ',files=[discord.File('./Res/snapshot.png')])
     lock.release()
 
+@slash.slash(
+    name='source_code',
+    description='Prints out a link to the source code',
+    guild_ids=clan_ids.values()
+)
+async def standings(sc):
+    await sc.send('https://github.com/lukaschristensson/Leagues3CBBot')
 
 @client.event
 async def on_ready():
-    print('Ready')
+    print('Ready for commands...')
 
 if __name__ == '__main__':
-    load_resources()
-    with open('./token', 'r') as s:
-        token = s.readline()
-        client.run(token)
+    load_all_resources()
+    client.run(open('./token', 'r').readline())
