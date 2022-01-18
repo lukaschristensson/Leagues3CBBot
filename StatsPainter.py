@@ -139,7 +139,7 @@ def __draw_category__(c, category, ir_members, os_members, DRAWN_CATEGORIES):
     best_os = best_os['rsn'], int(category['point_func'](best_os))
     best_ir = best_ir['rsn'], int(category['point_func'](best_ir))
 
-    if int(best_ir[1]) + int(best_os[1]) > 0:
+    if int(best_ir[1]) != 0 and int(best_os[1]) != 0:
         ANGLE = 2*math.pi*int(best_ir[1])/(int(best_ir[1])+int(best_os[1]))
     else:
         ANGLE = math.pi
