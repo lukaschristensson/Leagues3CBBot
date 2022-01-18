@@ -41,7 +41,7 @@ i can draw on the image like i would in tkinter
 class UtilCanvas:
     def __init__(self, background):
         self.im = background.copy()
-        self.draw = ImageDraw.Draw(background, 'RGBA')
+        self.draw = ImageDraw.Draw(self.im, 'RGBA')
 
     @staticmethod
     def to_pil_fill(s):
