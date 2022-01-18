@@ -31,7 +31,7 @@ CATEGORIES = [
 CATEGORY_SIZE = 40, 60  # inner and outer radius of the category orb
 
 def find_name(filename, name):
-    if not os.path.isfile(filename):
+    if os.path.isfile(filename):
         f = open(filename, 'r')
         for l in f.readlines():
             if l.split(': ')[0] == name: return int(l.split(': ')[1])
