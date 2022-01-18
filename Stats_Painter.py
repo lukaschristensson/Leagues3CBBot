@@ -244,9 +244,6 @@ def draw_all_categories(ir_data, os_data):
     DRAWN_CATEGORIES = []
     start_time = time.time()
     part_time = time.time()
-
-    print('Data parsed from cache',time.time() - part_time, 's')
-    part_time = time.time()
     for cat in CATEGORIES:
         __draw_category__(c, CATEGORIES[cat], ir_data, os_data, DRAWN_CATEGORIES)
     print('Categories drawn',time.time() - part_time, 's')

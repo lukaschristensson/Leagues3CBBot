@@ -31,6 +31,7 @@ def load_all_resources():
     guild_ids=clan_ids.values()
 )
 async def update_clan(sc):
+    print('update_clan was called')
     await sc.defer()
     auth = 0
     for auth_role in clan_authority_roles[sc.guild.id]: auth += auth_role.lower() in list(map(lambda x:x.name.lower(), sc.author.roles))
@@ -68,11 +69,10 @@ async def update_clan(sc):
     guild_ids=clan_ids.values()
 )
 async def update(sc, rsn):
+    print('update was called')
     await sc.defer()
     ir_members = list(map(lambda x:x.replace('\n', '').replace(',',''), open(IR_MEMBERS_URL, 'r').readlines()))
     os_members = list(map(lambda x:x.replace('\n', '').replace(',',''), open(OS_MEMBERS_URL, 'r').readlines()))
-    print(ir_members)
-    print(os_members)
     if rsn not in (ir_members if clan_ids['IR'] == sc.guild.id else os_members):
         await sc.send('Player '+rsn+' is not part of your clan, did you spell it correctly?')
     elif len(update_player_data(rsn)) == 1:
@@ -87,6 +87,7 @@ async def update(sc, rsn):
     guild_ids=clan_ids.values()
 )
 async def standings(sc):
+    print('standings was called')
     await sc.defer()
     ir_members = list(open(IR_MEMBERS_URL, 'r').readlines())
     os_members = list(open(OS_MEMBERS_URL, 'r').readlines())
@@ -101,7 +102,8 @@ async def standings(sc):
     description='Prints out a link to the source code',
     guild_ids=clan_ids.values()
 )
-async def standings(sc):
+async def source_code(sc):
+    print('source_code was called')
     await sc.send('https://github.com/lukaschristensson/Leagues3CBBot')
 
 @client.event
