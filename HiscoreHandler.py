@@ -142,7 +142,7 @@ def get_data(l, IR:bool):
     res = []
     os_cache, ir_cache = __get_cache__()
     if (ir_cache if IR else os_cache) is None:
-        __save_cache__(update_players_data(l), IR)
+        res = update_players_data(l)
     else:
         found = []
         for rsn in l:
@@ -154,7 +154,7 @@ def get_data(l, IR:bool):
                     found += [rsn]
                     break
         res += update_players_data(list(set(l) - set(found)))
-        __save_cache__(res, IR)
+    __save_cache__(res, IR)
     return res
 
 def update_player_data(p): return update_players_data([p])
