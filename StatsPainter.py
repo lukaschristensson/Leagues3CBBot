@@ -1,5 +1,5 @@
 import math
-import random
+import os.path
 import time
 import threading
 from PIL import ImageDraw, Image, ImageFont
@@ -19,19 +19,23 @@ fonts = {}
 png_lock = threading.Lock()
 
 # these are the categories that'll be drawn
-CATEGORIES = {
-    'HIGHEST MAX XP'       : {'title':'HIGHEST MAX XP'        , 'point_func':lambda p:p['total']['xp']},
-    'HIGHEST TOTAL LVL'    : {'title':'HIGHEST TOTAL LVL'     , 'point_func':lambda p:p['total']['level']},
-    'HIGHEST MAX CLUES'    : {'title':'HIGHEST MAX CLUES'     , 'point_func':lambda p:p['Clue Scrolls (all)']['kc']},
-    'HIGHEST MAX ZULRAH KC': {'title':'HIGHEST MAX ZULRAH KC' , 'point_func':lambda p:p['Zulrah']['kc']},
-    'HIGHEST MAX BOSS KC1' : {'title':'HIGHEST MAX BOSS KC1'  , 'point_func':lambda p:10**11},
-    'HIGHEST MAX BOSS KC2' : {'title':'HIGHEST MAX BOSS KC2'  , 'point_func':lambda p:random.uniform(0, 10**7)},
-    'HIGHEST MAX BOSS KC3' : {'title':'HIGHEST MAX BOSS KC3'  , 'point_func':lambda p:random.uniform(0, 10**7)},
-    'HIGHEST MAX BOSS KC4' : {'title':'HIGHEST MAX BOSS KC4'  , 'point_func':lambda p:random.uniform(0, 10**7)},
-    'HIGHEST MAX BOSS KC5' : {'title':'HIGHEST MAX BOSS KC5'  , 'point_func':lambda p:random.uniform(0, 10**7)},
-}
+CATEGORIES = [
+    {'title':'MOST XP'                    , 'point_func':lambda p:p['total']['xp']},
+    {'title':'MOST LEAGUE POINTS'         , 'point_func':lambda p:p['league points']['kc']},
+    {'title':'MOST TOB COMPLETIONS'       , 'point_func':lambda p:p['Chambers of Xeric']['kc'] + p['Chambers of Xeric: Challenge Mode']['kc']},
+    {'title':'MOST COX COMPLETIONS'       , 'point_func':lambda p:p['Theatre of Blood']['kc'] + p['Theatre of Blood: Hard Mode']['kc']},
+    {'title':'MOST CLUE SCROLL COMPLETED' , 'point_func':lambda p:p['Clue Scrolls (all)']['kc']},
+    {'title':'HIGHEST VALUED BANK'        , 'point_func':lambda p:find_name('Res/BankValues.txt', p['rsn'])},
+    {'title':'HIGHEST STRANGE FRUIT STACK', 'point_func':lambda p:find_name('Res/FruitStacks.txt', p['rsn'])},
+]
 CATEGORY_SIZE = 40, 60  # inner and outer radius of the category orb
 
+def find_name(filename, name):
+    if not os.path.isfile(filename):
+        f = open(filename, 'r')
+        for l in f.readlines():
+            if l.split(': ')[0] == name: return int(l.split(': ')[1])
+    return 0
 
 '''
 originally made the script for a tkinter canvas, switched to PILs image draw function
@@ -120,7 +124,7 @@ def __draw_category__(c, category, ir_members, os_members, DRAWN_CATEGORIES):
     starty = 390
     # 4 per row except for the last one
    # if len(DRAWN_CATEGORIES)//4 != 2:
-    x0 = startx + ((len(DRAWN_CATEGORIES)%3)+0.25)*((1000 - 2*startx)//2.5)
+    x0 = startx + ((len(DRAWN_CATEGORIES) == 6) + (len(DRAWN_CATEGORIES)%3)+0.25)*((1000 - 2*startx)//2.5)
    # else:
    #     x0 = startx + ((int(c['width']) - 2*startx)//2)
 
@@ -247,7 +251,7 @@ def draw_all_categories(ir_data, os_data):
     start_time = time.time()
     part_time = time.time()
     for cat in CATEGORIES:
-        __draw_category__(c, CATEGORIES[cat], ir_data, os_data, DRAWN_CATEGORIES)
+        __draw_category__(c, cat, ir_data, os_data, DRAWN_CATEGORIES)
     print('Categories drawn',time.time() - part_time, 's')
     part_time = time.time()
     # c.im.show()
