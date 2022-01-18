@@ -20,21 +20,26 @@ png_lock = threading.Lock()
 
 # these are the categories that'll be drawn
 CATEGORIES = [
-    {'title':'MOST XP'                    , 'point_func':lambda p:p['total']['xp']},
-    {'title':'MOST LEAGUE POINTS'         , 'point_func':lambda p:p['league points']['kc']},
-    {'title':'MOST TOB COMPLETIONS'       , 'point_func':lambda p:p['Chambers of Xeric']['kc'] + p['Chambers of Xeric: Challenge Mode']['kc']},
-    {'title':'MOST COX COMPLETIONS'       , 'point_func':lambda p:p['Theatre of Blood']['kc'] + p['Theatre of Blood: Hard Mode']['kc']},
-    {'title':'MOST CLUE SCROLL COMPLETED' , 'point_func':lambda p:p['Clue Scrolls (all)']['kc']},
-    {'title':'HIGHEST VALUED BANK'        , 'point_func':lambda p:find_name('Res/BankValues.txt', p['rsn'])},
-    {'title':'HIGHEST STRANGE FRUIT STACK', 'point_func':lambda p:find_name('Res/FruitStacks.txt', p['rsn'])},
+    {'title':'MOST XP'                , 'hidden':False, 'point_func':lambda p:p['total']['xp']},
+    {'title':'MOST LEAGUE POINTS'     , 'hidden':False, 'point_func':lambda p:p['league points']['kc']},
+    {'title':'MOST TOB COMPLETIONS'   , 'hidden':False, 'point_func':lambda p:p['Chambers of Xeric']['kc'] + p['Chambers of Xeric: Challenge Mode']['kc']},
+    {'title':'MOST COX COMPLETIONS'   , 'hidden':False, 'point_func':lambda p:p['Theatre of Blood']['kc'] + p['Theatre of Blood: Hard Mode']['kc']},
+    {'title':'MOST CLUES'             , 'hidden':False, 'point_func':lambda p:p['Clue Scrolls (all)']['kc']},
+    {'title':'HIGHEST VALUED BANK'    , 'hidden':False, 'point_func':lambda p:find_name('Res/BankValues.txt', p['rsn'])},
+    {'title':'MOST FROG TOKENS'       , 'hidden':False, 'point_func':lambda p:find_name('Res/FrogStacks.txt', p['rsn'])},
+    {'title':'MOST WILDY AGILITY LAPS', 'hidden':False, 'point_func':lambda p:find_name('Res/WildyAgil.txt', p['rsn'])},
+    {'title':'MOST NO CODE DIVING DUMBASS KILLS'       , 'hidden':True , 'point_func':lambda p:p['NO CODE DIVING DUMBASS']['NO CODE DIVING DUMBASS']},
 ]
+
 CATEGORY_SIZE = 40, 60  # inner and outer radius of the category orb
 
 def find_name(filename, name):
     if os.path.isfile(filename):
         f = open(filename, 'r')
         for l in f.readlines():
-            if l.split(': ')[0] == name: return int(l.split(': ')[1])
+            try:
+                if l.split(': ')[0] == name: return int(l.split(': ')[1])
+            except: pass
     return 0
 
 '''
@@ -122,11 +127,7 @@ def __draw_category__(c, category, ir_members, os_members, DRAWN_CATEGORIES):
     # x is just padding and y is to accommodate for the backgrounds header
     startx = 150
     starty = 390
-    # 4 per row except for the last one
-   # if len(DRAWN_CATEGORIES)//4 != 2:
-    x0 = startx + ((len(DRAWN_CATEGORIES) == 6) + (len(DRAWN_CATEGORIES)%3)+0.25)*((1000 - 2*startx)//2.5)
-   # else:
-   #     x0 = startx + ((int(c['width']) - 2*startx)//2)
+    x0 = startx + ((len(DRAWN_CATEGORIES)%3)+0.25)*((1000 - 2*startx)//2.5)
 
     y0 = starty + ((1000 - starty)//2.5)*(len(DRAWN_CATEGORIES)//3)
 
@@ -138,7 +139,10 @@ def __draw_category__(c, category, ir_members, os_members, DRAWN_CATEGORIES):
     best_os = best_os['rsn'], int(category['point_func'](best_os))
     best_ir = best_ir['rsn'], int(category['point_func'](best_ir))
 
-    ANGLE = 2*math.pi*int(best_ir[1])/(int(best_ir[1])+int(best_os[1]))
+    if int(best_ir[1]) + int(best_os[1]) > 0:
+        ANGLE = 2*math.pi*int(best_ir[1])/(int(best_ir[1])+int(best_os[1]))
+    else:
+        ANGLE = math.pi
     # dirty conversion to ks and ms
     if 10000 > best_os[1]:
         best_os = best_os[0], str(best_os[1])
@@ -198,12 +202,12 @@ def __draw_category__(c, category, ir_members, os_members, DRAWN_CATEGORIES):
     c.create_text(
         x0,
         y0 - r2 - 30 - 3.2*font_size,
-        text=category['title'], font=('COCO SHARP', int(font_size*1.1), 'bold'),fill='#ccc'
+        text=category['title'] if not category['hidden'] else 'HIDDEN', font=('COCO SHARP', int(font_size*1), 'bold'),fill='#ccc'
     )
     c.create_text(
         x0 + font_size*1 - font_size*7,
         y0 - r2 - 30 - 1*font_size*1.3,
-        text=best_os[0], font=('COCO SHARP', font_size), anchor='left',fill='#ccc'
+        text=best_os[0] if not category['hidden'] else '???', font=('COCO SHARP', font_size), anchor='left',fill='#ccc'
     )
     c.create_text(
         x0 + font_size*3,
@@ -213,12 +217,12 @@ def __draw_category__(c, category, ir_members, os_members, DRAWN_CATEGORIES):
     c.create_text(
         x0 + font_size*6,
         y0 - r2 - 30 - 1*font_size*1.3,
-        text=best_os[1], font=('COCO SHARP', font_size), anchor='right',fill='#ccc'
+        text=best_os[1] if not category['hidden'] else '???', font=('COCO SHARP', font_size), anchor='right',fill='#ccc'
     )
     c.create_text(
         x0 + font_size*1 - font_size*7,
         y0 - r2 - 30 - 0*font_size*1.3,
-        text=best_ir[0],font=('COCO SHARP', font_size), anchor='left',fill='#ccc'
+        text=best_ir[0] if not category['hidden'] else '???',font=('COCO SHARP', font_size), anchor='left',fill='#ccc'
     )
     c.create_text(
         x0 + font_size*3,
@@ -228,7 +232,7 @@ def __draw_category__(c, category, ir_members, os_members, DRAWN_CATEGORIES):
     c.create_text(
         x0 + font_size*6,
         y0 - r2 - 30 - 0*font_size*1.3,
-        text=best_ir[1], font=('COCO SHARP', font_size), anchor='right',fill='#ccc'
+        text=best_ir[1] if not category['hidden'] else '???', font=('COCO SHARP', font_size), anchor='right',fill='#ccc'
     )
 
     # line under the title

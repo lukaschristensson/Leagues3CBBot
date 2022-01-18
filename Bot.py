@@ -92,8 +92,8 @@ async def update(sc, rsn):
 async def standings(sc):
     print('standings was called')
     await sc.defer()
-    ir_members = list(open(IR_MEMBERS_URL, 'r').readlines())
-    os_members = list(open(OS_MEMBERS_URL, 'r').readlines())
+    ir_members = list(map(lambda x:x.replace('\n', '').replace(',',''), open(IR_MEMBERS_URL, 'r').readlines()))
+    os_members = list(map(lambda x:x.replace('\n', '').replace(',',''), open(OS_MEMBERS_URL, 'r').readlines()))
     ir_data = get_data(ir_members, True)
     os_data = get_data(os_members, False)
     try:

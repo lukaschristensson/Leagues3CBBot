@@ -113,15 +113,15 @@ def __parse_data__(rsn, d):
     res = {'rsn':rsn}
 
     for skill in SKILLS:
-        data = list(map(int, d_s[ind].split(',')))
+        data = list(map(lambda x:int(x)*(int(x) > 0), d_s[ind].split(',')))
         res[skill] = {FORMATTING['SKILLS'][0]:data[0], FORMATTING['SKILLS'][1]:data[1], FORMATTING['SKILLS'][2]:data[2]}
         ind += 1
     for mg in MINIGAMES:
-        data = list(map(int, d_s[ind].split(',')))
+        data = list(map(lambda x:int(x)*(int(x) > 0), d_s[ind].split(',')))
         res[mg] = {FORMATTING['MINIGAMES'][0]:data[0], FORMATTING['MINIGAMES'][1]:data[1]}
         ind += 1
     for boss in BOSSES:
-        data = list(map(int, d_s[ind].split(',')))
+        data = list(map(lambda x:int(x)*(int(x) > 0), d_s[ind].split(',')))
         res[boss] = {FORMATTING['BOSSES'][0]:data[0], FORMATTING['BOSSES'][1]:data[1]}
         ind += 1
     return res
