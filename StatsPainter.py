@@ -40,7 +40,7 @@ i can draw on the image like i would in tkinter
 '''
 class UtilCanvas:
     def __init__(self, background):
-        self.im = background
+        self.im = background.copy()
         self.draw = ImageDraw.Draw(background, 'RGBA')
 
     @staticmethod
@@ -240,6 +240,8 @@ def __draw_category__(c, category, ir_members, os_members, DRAWN_CATEGORIES):
     DRAWN_CATEGORIES.append(category)
 
 def draw_all_categories(ir_data, os_data):
+    if len(ir_data)*len(os_data) == 0:
+        raise NotEnoughDataException
     c = UtilCanvas(images['background'])
     DRAWN_CATEGORIES = []
     start_time = time.time()
@@ -255,3 +257,4 @@ def draw_all_categories(ir_data, os_data):
     print('Image saved',time.time() - part_time, 's')
     print('Total time: %3f s'%(time.time() - start_time))
     return png_lock
+class NotEnoughDataException(Exception): pass

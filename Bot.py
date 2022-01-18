@@ -4,7 +4,7 @@ from discord.ext import commands
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.model import SlashCommandOptionType
 from discord_slash.utils.manage_commands import create_choice, create_option
-from Stats_Painter import *
+from StatsPainter import *
 from HiscoreHandler import *
 
 OS_MEMBERS_URL = './Res/os_members.txt'
@@ -49,8 +49,11 @@ async def update_clan(sc):
 
             ir_data = get_data(ir_members, True)
             os_data = get_data(os_members, False)
-
-            png_lock = draw_all_categories(ir_data, os_data)
+            try:
+                png_lock = draw_all_categories(ir_data, os_data)
+            except NotEnoughDataException as e:
+                await sc.send(str(tot_updated) + ' members from ' + ('Iron Republic ' if clan_ids['IR'] == sc.guild.id else 'One Shot ') + ' have been updated.')
+                return
 
             await sc.send(str(tot_updated) + ' members from ' + ('Iron Republic ' if clan_ids['IR'] == sc.guild.id else 'One Shot ') + ' have been updated. These are the current standings.', files=[discord.File('./Res/snapshot.png')])
             png_lock.release()
@@ -93,7 +96,11 @@ async def standings(sc):
     os_members = list(open(OS_MEMBERS_URL, 'r').readlines())
     ir_data = get_data(ir_members, True)
     os_data = get_data(os_members, False)
-    lock = draw_all_categories(ir_data, os_data)
+    try:
+        lock = draw_all_categories(ir_data, os_data)
+    except NotEnoughDataException as e:
+        await sc.send('The bot hasn\'t collected enough data yet, contact your clan owner for more information or try again in a few mintues!')
+        return
     await sc.send(' ',files=[discord.File('./Res/snapshot.png')])
     lock.release()
 
