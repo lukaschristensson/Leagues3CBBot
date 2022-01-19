@@ -161,18 +161,41 @@ def update_player_data(p): return update_players_data([p])
 def update_players_data(l):
     res = []
     def add_user(rsn):
-        d = rq.get(TEST_LITE_URL+rsn).text
+        d = rq.get(LITE_URL+rsn).text
         return __parse_data__(rsn, d)
     # get a thread pool to wait for several api calls at the same time
     ex = ft.ThreadPoolExecutor(max_workers=100)
     ps = []
     for e in l:
         # submit a task for each rsn
-        ps += [ex.submit(add_user, e)] # [:-2] to remove the newline and , created by the csv
+        ps += [ex.submit(add_user, e)]
     for e in ft.as_completed(ps):
         try:
             r = e.result()
             if r is not None: res += [r]
         except Exception as e:
             print(e)
+    os_cache, ir_cache = __get_cache__()
+    if os_cache is not None:
+        pairs_found = []
+        for e1 in os_cache:
+            for e2 in res:
+                if e1['rsn'] == e2['rsn']: pairs_found += e1, e2
+        for es in pairs_found:
+            os_cache.remove(es[0])
+            os_cache.append(es[1])
+            res.remove(es[1])
+        __save_cache__(os_cache, False)
+    if ir_cache is not None:
+        if not cache_lock.locked(): cache_lock.acquire()
+        pairs_found = []
+        for e1 in ir_cache:
+            for e2 in res:
+                if e1['rsn'] == e2['rsn']: pairs_found += e1, e2
+        for es in pairs_found:
+            ir_cache.remove(es[0])
+            ir_cache.append(es[1])
+            res.remove(es[1])
+        __save_cache__(ir_cache, True)
     return res
+

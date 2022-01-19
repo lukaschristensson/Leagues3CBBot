@@ -18,8 +18,7 @@ clan_authority_roles = {}
 def load_all_resources():
     load_resources()
     ids = open('./server_ids', 'r').readline()
-   # clan_ids['MOM'], clan_ids['IR'], clan_ids['OS'] = list(map(int,ids.split(', ')))
-    clan_ids['IR'], clan_ids['MOM'], clan_ids['OS'] = list(map(int,ids.split(', ')))    # swapping mom and ir server id to test things
+    clan_ids['MOM'], clan_ids['IR'], clan_ids['OS'] = list(map(int,ids.split(', ')))
 
     clan_authority_roles[clan_ids['MOM']]= ['admin']
     clan_authority_roles[clan_ids['IR']] = ['leaders', 'event team', 'admin']
