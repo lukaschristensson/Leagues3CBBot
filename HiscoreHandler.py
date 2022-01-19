@@ -180,18 +180,17 @@ def update_players_data(l):
         pairs_found = []
         for e1 in os_cache:
             for e2 in res:
-                if e1['rsn'] == e2['rsn']: pairs_found += e1, e2
+                if e1['rsn'] == e2['rsn']: pairs_found += [(e1, e2)]
         for es in pairs_found:
             os_cache.remove(es[0])
             os_cache.append(es[1])
             res.remove(es[1])
         __save_cache__(os_cache, False)
     if ir_cache is not None:
-        if not cache_lock.locked(): cache_lock.acquire()
         pairs_found = []
         for e1 in ir_cache:
             for e2 in res:
-                if e1['rsn'] == e2['rsn']: pairs_found += e1, e2
+                if e1['rsn'] == e2['rsn']: pairs_found += [(e1, e2)]
         for es in pairs_found:
             ir_cache.remove(es[0])
             ir_cache.append(es[1])
